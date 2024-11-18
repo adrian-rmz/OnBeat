@@ -15,6 +15,7 @@ struct AddDeadlineView: View {
     
     @State private var deadlineName = ""
     @State private var dueDate = Date()
+    @State private var friendsGroup = ""
     @State private var prizeName = ""
     @State private var prizeImageData: Data? = nil // Store image data here
     @State private var isImagePickerPresented = false
@@ -27,6 +28,7 @@ struct AddDeadlineView: View {
                 Section(header: Text("Deadline Information")) {
                     TextField("Deadline Name", text: $deadlineName)
                     DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
+                    TextField("Friends Group", text: $friendsGroup)
                 }
                 
                 Section(header: Text("Prize Information")) {
@@ -61,7 +63,7 @@ struct AddDeadlineView: View {
                             prizeImageData = selectedImage.jpegData(compressionQuality: 0.8) // Convert to Data (JPEG format)
                         }
                         
-                        addDeadline(to: modelContext, name: deadlineName, dueDate: dueDate, prizeName: prizeName, prizeImageData: prizeImageData)
+                        addDeadline(to: modelContext, name: deadlineName, dueDate: dueDate, friendsGroup: friendsGroup, prizeName: prizeName, prizeImageData: prizeImageData)
                         isPresented = false // Dismiss the view after saving
                     }
                     .disabled(deadlineName.isEmpty || prizeName.isEmpty) // Disable if fields are empty

@@ -14,6 +14,7 @@ struct EditDeadlineView: View {
     @Binding var isPresented: Bool  // To dismiss the sheet
     @State private var newName: String
     @State private var newDueDate: Date
+    @State private var newFriendsGroup: String
     @State private var newPrizeName: String
     @State private var newPrizeImage: UIImage? // Change Data? to UIImage?
     @State private var showImagePicker = false
@@ -24,6 +25,7 @@ struct EditDeadlineView: View {
         
         _newName = State(initialValue: deadline.name)
         _newDueDate = State(initialValue: deadline.dueDate)
+        _newFriendsGroup = State(initialValue: deadline.friendsGroup)
         _newPrizeName = State(initialValue: deadline.prizeName)
         _newPrizeImage = State(initialValue: deadline.prizeImageData != nil ? UIImage(data: deadline.prizeImageData!) : nil) // Initialize the image from the data if available
     }
@@ -35,6 +37,8 @@ struct EditDeadlineView: View {
                     TextField("Name", text: $newName)
                     
                     DatePicker("Due Date", selection: $newDueDate, displayedComponents: .date)
+                    
+                    TextField("Friends Group", text: $newFriendsGroup)
                 }
                 Section(header: Text("Prize Information")) {
                     TextField("Prize Name", text: $newPrizeName)
@@ -69,7 +73,7 @@ struct EditDeadlineView: View {
                         // Convert the selected image back to Data if a new image was selected
                         let newPrizeImageData = newPrizeImage?.jpegData(compressionQuality: 0.8) // Convert UIImage to Data
                         // Save the changes to the deadline
-                        editDeadline(from: modelContext, deadline: deadline, newName: newName, newDueDate: newDueDate, newPrizeName: newPrizeName, newPrizeImageData: newPrizeImageData)
+                        editDeadline(from: modelContext, deadline: deadline, newName: newName, newDueDate: newDueDate, newFriendsGroup: newFriendsGroup, newPrizeName: newPrizeName, newPrizeImageData: newPrizeImageData)
                         isPresented = false  // Dismiss the sheet after saving
                     }
                     .disabled(newName.isEmpty || newPrizeName.isEmpty) // Disable button if fields are empty

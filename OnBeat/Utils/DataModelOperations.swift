@@ -8,14 +8,15 @@
 import SwiftUI
 import SwiftData
 
-func addDeadline(to modelContext: ModelContext, name: String, dueDate: Date, prizeName: String, prizeImageData: Data?) {
-    let newDeadline = Deadline(name: name, dueDate: dueDate, prizeName: prizeName, prizeImageData: prizeImageData)
+func addDeadline(to modelContext: ModelContext, name: String, dueDate: Date, friendsGroup: String, prizeName: String, prizeImageData: Data?) {
+    let newDeadline = Deadline(name: name, dueDate: dueDate, friendsGroup: friendsGroup, prizeName: prizeName, prizeImageData: prizeImageData)
     modelContext.insert(newDeadline)
 }
 
-func editDeadline(from modelContext: ModelContext, deadline: Deadline, newName: String, newDueDate: Date, newPrizeName: String, newPrizeImageData: Data?) {
+func editDeadline(from modelContext: ModelContext, deadline: Deadline, newName: String, newDueDate: Date, newFriendsGroup: String, newPrizeName: String, newPrizeImageData: Data?) {
     deadline.name = newName
     deadline.dueDate = newDueDate
+    deadline.friendsGroup = newFriendsGroup
     deadline.prizeName = newPrizeName
     deadline.prizeImageData = newPrizeImageData
     try! modelContext.save()

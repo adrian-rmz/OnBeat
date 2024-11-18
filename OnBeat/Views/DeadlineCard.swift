@@ -11,6 +11,8 @@ struct DeadlineCard: View {
     var deadline: Deadline
     var onEdit: () -> Void
     var onDelete: () -> Void
+    
+    @State private var showActionMenu = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -35,27 +37,53 @@ struct DeadlineCard: View {
 
                 // Days Left Badge - Positioned at the bottom right
                 Text("\(daysLeft()) days left")
-                    .font(.caption)
+//                    .font(.headline)
                     .padding(8)
                     .background(Color.white)
                     .cornerRadius(10)
                     .padding([.bottom, .trailing], 10)
+                    .foregroundColor(.black)
             }
 
             // Text and Progress Section
             VStack(alignment: .leading, spacing: 5) {
                 HStack {
                     Text(deadline.name)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                    Text("· Friends")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+//                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.black)
+                    Text("· \(deadline.friendsGroup)")
+//                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.black)
+                    
+                    Spacer()
+                    
+                    // Three dots menu button (for more actions)
+                    Button(action: {
+                        showActionMenu.toggle()
+                    }) {
+                        Image(systemName: "ellipsis")
+                            .foregroundColor(.gray)
+                            .rotationEffect(Angle(degrees: 90))
+                    }
+                    .actionSheet(isPresented: $showActionMenu) {
+                        ActionSheet(title: Text("Actions"), buttons: [
+                            .default(Text("Edit")) {
+                                onEdit()
+                            },
+                            .destructive(Text("Delete")) {
+                                onDelete()
+                            },
+                            .cancel()
+                        ])
+                    }
                 }
 
                 Text(deadline.prizeName)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+//                    .font(.subheadline)
+                    .italic()
+                    .foregroundColor(.gray)
 
                 // Progress Bar
                 ProgressView(value: deadline.progress, total: 1)
@@ -84,6 +112,7 @@ struct DeadlineCard: View {
     DeadlineCard(deadline: Deadline(
         name: "Hackathon",
         dueDate: Calendar.current.date(byAdding: .day, value: 23, to: Date())!,
+        friendsGroup: "Sushi",
         prizeName: "Sushi",
         prizeImageData: nil
     )) {
