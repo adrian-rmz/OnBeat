@@ -11,8 +11,8 @@ import SwiftData
 struct DeadlinesView: View {
     @Environment(\.modelContext) var modelContext
     
-    @Query private var deadlines: [Deadline]
-    
+    @Query(sort: \Deadline.dueDate, order: .forward) private var deadlines: [Deadline]
+
     @State private var isPresentingAddDeadlineView = false
     @State private var selectedDeadline: Deadline?
     
@@ -76,11 +76,3 @@ struct DeadlinesView: View {
 #Preview {
     DeadlinesView()
 }
-
-
-
-
-
-
-
-

@@ -47,7 +47,7 @@ struct DeadlineDetailView: View {
 
                 // Tasks Section
                 VStack(spacing: 15) {
-                    ForEach(deadline.tasks) { task in
+                    ForEach(deadline.tasks, id: \.id) { task in // Explicitly use the `id` property
                         TimelineTaskView(task: task)
                     }
                 }
@@ -130,5 +130,3 @@ struct DeadlineDetailView: View {
         showShareSheet = true
     }
 }
-
-

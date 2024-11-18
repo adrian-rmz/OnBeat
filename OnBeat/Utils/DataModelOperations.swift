@@ -29,6 +29,7 @@ func toggleTaskCompletion(in modelContext: ModelContext, for task: TaskItem) {
 }
 
 func addTask(from modelContext: ModelContext, to deadline: Deadline, name: String, completionDate: Date?) {
-    let newTask = TaskItem(name: name, isCompleted: false, completionDate: completionDate)
+    let newIndex = deadline.tasks.count
+    let newTask = TaskItem(name: name, isCompleted: false, completionDate: completionDate, index: newIndex)
     deadline.tasks.append(newTask)
 }

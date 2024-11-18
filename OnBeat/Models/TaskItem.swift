@@ -15,12 +15,14 @@ final class TaskItem {
     var isCompleted: Bool = false
     var completionDate: Date?
     var completionImageData: Data?
+    var index: Int
 
-    init(name: String, isCompleted: Bool = false, completionDate: Date? = nil, completionImageData: Data? = nil) {
+    init(name: String, isCompleted: Bool = false, completionDate: Date? = nil, completionImageData: Data? = nil, index: Int) {
         self.name = name
         self.isCompleted = isCompleted
         self.completionDate = completionDate
         self.completionImageData = completionImageData
+        self.index = index
     }
 
     var completionImage: UIImage? {
