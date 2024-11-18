@@ -17,61 +17,87 @@ struct AddDeadlineView: View {
     @State private var dueDate = Date()
     @State private var friendsGroup = ""
     @State private var prizeName = ""
-    @State private var prizeImageData: Data? = nil // Store image data here
+    @State private var prizeImageData: Data? = nil
     @State private var isImagePickerPresented = false
     @State private var selectedImage: UIImage?
-    @State private var isCamera = false // Track whether we are using the camera or the library
     
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Deadline Information")) {
-                    TextField("Deadline Name", text: $deadlineName)
-                    DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
-                    TextField("Friends Group", text: $friendsGroup)
-                }
-                
-                Section(header: Text("Prize Information")) {
-                    TextField("Prize Name", text: $prizeName)
+                // Image Section
+                Button(action: {
+                    isImagePickerPresented = true // Open image picker
+                }) {
                     if let selectedImage = selectedImage {
+                        // Show selected image
                         Image(uiImage: selectedImage)
                             .resizable()
                             .scaledToFill()
-                            .frame(width: 100, height: 100)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.gray, lineWidth: 2))
-                            .padding(.vertical)
-                    }
-                    
-                    Button("Select or Take a Photo") {
-                        isImagePickerPresented = true
-                        isCamera = true // Use the camera by default
+                            .frame(height: 200)
+                            .clipShape(RoundedRectangle(cornerRadius: 15))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 15)
+                                    .stroke(Color.gray, lineWidth: 1)
+                            )
+                            .padding(.horizontal)
+                    } else {
+                        // Placeholder button when no image is selected
+                        VStack {
+                            Image(systemName: "photo.on.rectangle.angled")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .foregroundColor(.gray)
+                            Text("Add Prize Image")
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 200)
+                        .background(Color.gray.opacity(0.2))
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                        .padding(.horizontal)
                     }
                 }
+                .buttonStyle(PlainButtonStyle()) // Remove button animation
+
+                // Text Fields
+                TextField("Deadline Name", text: $deadlineName)
+                DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
+                TextField("Friends Group", text: $friendsGroup)
+                TextField("Prize Name", text: $prizeName)
             }
             .navigationTitle("Add Deadline")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
-                        isPresented = false // Dismiss the view when cancel is tapped
+                        isPresented = false
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
-                        // Convert UIImage to Data
                         if let selectedImage = selectedImage {
-                            prizeImageData = selectedImage.jpegData(compressionQuality: 0.8) // Convert to Data (JPEG format)
+                            prizeImageData = selectedImage.jpegData(compressionQuality: 0.8)
                         }
                         
-                        addDeadline(to: modelContext, name: deadlineName, dueDate: dueDate, friendsGroup: friendsGroup, prizeName: prizeName, prizeImageData: prizeImageData)
-                        isPresented = false // Dismiss the view after saving
+                        addDeadline(
+                            to: modelContext,
+                            name: deadlineName,
+                            dueDate: dueDate,
+                            friendsGroup: friendsGroup,
+                            prizeName: prizeName,
+                            prizeImageData: prizeImageData
+                        )
+                        isPresented = false
                     }
-                    .disabled(deadlineName.isEmpty || prizeName.isEmpty) // Disable if fields are empty
+                    .disabled(deadlineName.isEmpty || prizeName.isEmpty || friendsGroup.isEmpty)
                 }
             }
             .sheet(isPresented: $isImagePickerPresented) {
-                // Image Picker to choose photo from library or camera
-                ImagePicker(isImagePickerPresented: $isImagePickerPresented, selectedImage: $selectedImage, sourceType: .photoLibrary)
+                ImagePicker(
+                    isImagePickerPresented: $isImagePickerPresented,
+                    selectedImage: $selectedImage,
+                    sourceType: .photoLibrary
+                )
             }
         }
     }

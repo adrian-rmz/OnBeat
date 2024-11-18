@@ -11,14 +11,15 @@ struct EditDeadlineView: View {
     @Environment(\.modelContext) var modelContext
     
     var deadline: Deadline
-    @Binding var isPresented: Bool  // To dismiss the sheet
+    @Binding var isPresented: Bool
+    
     @State private var newName: String
     @State private var newDueDate: Date
     @State private var newFriendsGroup: String
     @State private var newPrizeName: String
-    @State private var newPrizeImage: UIImage? // Change Data? to UIImage?
-    @State private var showImagePicker = false
-
+    @State private var newPrizeImage: UIImage?
+    @State private var isImagePickerPresented = false
+    
     init(deadline: Deadline, isPresented: Binding<Bool>) {
         self.deadline = deadline
         self._isPresented = isPresented
@@ -27,60 +28,87 @@ struct EditDeadlineView: View {
         _newDueDate = State(initialValue: deadline.dueDate)
         _newFriendsGroup = State(initialValue: deadline.friendsGroup)
         _newPrizeName = State(initialValue: deadline.prizeName)
-        _newPrizeImage = State(initialValue: deadline.prizeImageData != nil ? UIImage(data: deadline.prizeImageData!) : nil) // Initialize the image from the data if available
+        _newPrizeImage = State(initialValue: deadline.prizeImageData != nil ? UIImage(data: deadline.prizeImageData!) : nil)
     }
 
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Deadline Information")) {
-                    TextField("Name", text: $newName)
-                    
-                    DatePicker("Due Date", selection: $newDueDate, displayedComponents: .date)
-                    
-                    TextField("Friends Group", text: $newFriendsGroup)
-                }
-                Section(header: Text("Prize Information")) {
-                    TextField("Prize Name", text: $newPrizeName)
-                    
-                    Button(action: {
-                        showImagePicker = true
-                    }) {
-                        Text("Choose Prize Image")
-                            .foregroundColor(.blue)
-                    }
-                    
-                    if let prizeImage = newPrizeImage {
-                        Image(uiImage: prizeImage)
+                // Image Section
+                Button(action: {
+                    isImagePickerPresented = true
+                }) {
+                    if let newPrizeImage = newPrizeImage {
+                        // Show selected image
+                        Image(uiImage: newPrizeImage)
                             .resizable()
                             .scaledToFill()
-                            .frame(width: 100, height: 100)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.gray, lineWidth: 2))
-                            .padding(.top, 10)
+                            .frame(height: 200)
+                            .clipShape(RoundedRectangle(cornerRadius: 15))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 15)
+                                    .stroke(Color.gray, lineWidth: 1)
+                            )
+                            .padding(.horizontal)
+                    } else {
+                        // Placeholder when no image is selected
+                        VStack {
+                            Image(systemName: "photo.on.rectangle.angled")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .foregroundColor(.gray)
+                            Text("Add Image")
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 200)
+                        .background(Color.gray.opacity(0.2))
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                        .padding(.horizontal)
                     }
                 }
+                .buttonStyle(PlainButtonStyle())
+
+                // Text Fields
+                TextField("Deadline Name", text: $newName)
+                DatePicker("Due Date", selection: $newDueDate, displayedComponents: .date)
+                TextField("Friends Group", text: $newFriendsGroup)
+                TextField("Prize Name", text: $newPrizeName)
             }
             .navigationTitle("Edit Deadline")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
-                        isPresented = false // Dismiss the view if the user cancels
+                        isPresented = false
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
-                        // Convert the selected image back to Data if a new image was selected
-                        let newPrizeImageData = newPrizeImage?.jpegData(compressionQuality: 0.8) // Convert UIImage to Data
+                        // Convert selected image to Data if it exists
+                        let newPrizeImageData = newPrizeImage?.jpegData(compressionQuality: 0.8)
+                        
                         // Save the changes to the deadline
-                        editDeadline(from: modelContext, deadline: deadline, newName: newName, newDueDate: newDueDate, newFriendsGroup: newFriendsGroup, newPrizeName: newPrizeName, newPrizeImageData: newPrizeImageData)
-                        isPresented = false  // Dismiss the sheet after saving
+                        editDeadline(
+                            from: modelContext,
+                            deadline: deadline,
+                            newName: newName,
+                            newDueDate: newDueDate,
+                            newFriendsGroup: newFriendsGroup,
+                            newPrizeName: newPrizeName,
+                            newPrizeImageData: newPrizeImageData
+                        )
+                        isPresented = false
                     }
-                    .disabled(newName.isEmpty || newPrizeName.isEmpty) // Disable button if fields are empty
+                    .disabled(newName.isEmpty || newPrizeName.isEmpty || newFriendsGroup.isEmpty)
                 }
             }
-            .sheet(isPresented: $showImagePicker) {
-                ImagePicker(isImagePickerPresented: $showImagePicker, selectedImage: $newPrizeImage, sourceType: .photoLibrary) // Pass UIImage binding
+            .sheet(isPresented: $isImagePickerPresented) {
+                ImagePicker(
+                    isImagePickerPresented: $isImagePickerPresented,
+                    selectedImage: $newPrizeImage,
+                    sourceType: .photoLibrary
+                )
             }
         }
     }
