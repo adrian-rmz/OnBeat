@@ -12,89 +12,83 @@ struct DeadlineCard: View {
     var onEdit: () -> Void
     var onDelete: () -> Void
 
-    @State private var showActionMenu = false
-
     var body: some View {
-        VStack(alignment: .leading) {
-            HStack {
-                // Prize Image
+        VStack(alignment: .leading, spacing: 0) {
+            // Image Section
+            ZStack(alignment: .bottomTrailing) {
                 if let prizeImageData = deadline.prizeImageData, let prizeImage = UIImage(data: prizeImageData) {
                     Image(uiImage: prizeImage)
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 60, height: 60)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.gray, lineWidth: 2))
+                        .frame(height: 180)
+                        .clipShape(CustomTopRoundedRectangle(cornerRadius: 15))
+                        .overlay(
+                            CustomTopRoundedRectangle(cornerRadius: 15)
+                                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                        )
                 } else {
-                    Circle()
+                    CustomTopRoundedRectangle(cornerRadius: 15)
                         .fill(Color.gray.opacity(0.2))
-                        .frame(width: 60, height: 60)
+                        .frame(height: 180)
                 }
 
-                VStack(alignment: .leading, spacing: 5) {
+
+                // Days Left Badge - Positioned at the bottom right
+                Text("\(daysLeft()) days left")
+                    .font(.caption)
+                    .padding(8)
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .padding([.bottom, .trailing], 10)
+            }
+
+            // Text and Progress Section
+            VStack(alignment: .leading, spacing: 5) {
+                HStack {
                     Text(deadline.name)
                         .font(.headline)
                         .foregroundColor(.primary)
-
-                    Text("Due: \(deadline.dueDate, formatter: DateFormatter.shortDateFormatter)")
+                    Text("· Friends")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-
-                    // Progress Bar
-                    ProgressView(value: deadline.progress, total: 1)
-                        .progressViewStyle(LinearProgressViewStyle())
-                        .frame(height: 5)
-                        .padding(.top, 5)
                 }
-                .padding(.leading, 10)
 
-                Spacer()
+                Text(deadline.prizeName)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
 
-                // Three dots menu button (for more actions)
-                Button(action: {
-                    showActionMenu.toggle()
-                }) {
-                    Image(systemName: "ellipsis")
-                        .foregroundColor(.gray)
-                        .font(.title2)
-                        .rotationEffect(Angle(degrees: 90))
-                }
-                .actionSheet(isPresented: $showActionMenu) {
-                    ActionSheet(title: Text("Actions"), buttons: [
-                        .default(Text("Edit")) {
-                            onEdit()
-                        },
-                        .destructive(Text("Delete")) {
-                            onDelete()
-                        },
-                        .cancel()
-                    ])
-                }
+                // Progress Bar
+                ProgressView(value: deadline.progress, total: 1)
+                    .progressViewStyle(LinearProgressViewStyle(tint: Color.blue))
+                    .frame(height: 8)
+                    .cornerRadius(4)
+                    .padding(.top, 5)
             }
-            .padding()
-            .background(Color.white)
-            .cornerRadius(15)
-            .shadow(radius: 5)
-            .padding(.horizontal)
+            .padding(.horizontal, 15)
+            .padding(.vertical, 10)
         }
-        .padding(.bottom, 5)
+        .background(Color.white)
+        .cornerRadius(15)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 3)
+        .padding(.horizontal)
+    }
+
+    private func daysLeft() -> Int {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day], from: Date(), to: deadline.dueDate)
+        return components.day ?? 0
     }
 }
 
 #Preview {
     DeadlineCard(deadline: Deadline(
-        name: "Plan Weekly Meal Prep",
-        dueDate: Date(),
-        prizeName: "Free Meal",
-        prizeImageData: nil // Optional: add image data here if needed
+        name: "Hackathon",
+        dueDate: Calendar.current.date(byAdding: .day, value: 23, to: Date())!,
+        prizeName: "Sushi",
+        prizeImageData: nil
     )) {
-        // Action for editing the deadline
         print("Edit Deadline")
     } onDelete: {
-        // Action for deleting the deadline
         print("Delete Deadline")
     }
 }
-
-
-
