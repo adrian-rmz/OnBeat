@@ -52,7 +52,7 @@ struct DeadlineCard: View {
 //                        .font(.headline)
                         .fontWeight(.bold)
                         .foregroundColor(.black)
-                    Text("· \(deadline.friendsGroup)")
+                    Text("· \(deadline.teamName)")
 //                        .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundColor(.black)
@@ -112,7 +112,8 @@ struct DeadlineCard: View {
     DeadlineCard(deadline: Deadline(
         name: "Hackathon",
         dueDate: Calendar.current.date(byAdding: .day, value: 23, to: Date())!,
-        friendsGroup: "Sushi",
+        teamName: "Sushi",
+        teamEmoji: "😂",
         prizeName: "Sushi",
         prizeImageData: nil
     )) {

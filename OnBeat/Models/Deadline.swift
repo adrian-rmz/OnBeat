@@ -14,15 +14,17 @@ final class Deadline {
     @Attribute(.unique) var id: UUID = UUID()
     var name: String
     var dueDate: Date
-    var friendsGroup: String
+    var teamName: String
+    var teamEmoji: String
     var prizeName: String
     var prizeImageData: Data?
     var tasks: [TaskItem] = []
 
-    init(name: String, dueDate: Date, friendsGroup: String, prizeName: String, prizeImageData: Data? = nil) {
+    init(name: String, dueDate: Date, teamName: String, teamEmoji: String, prizeName: String, prizeImageData: Data? = nil) {
         self.name = name
         self.dueDate = dueDate
-        self.friendsGroup = friendsGroup
+        self.teamName = teamName
+        self.teamEmoji = teamEmoji
         self.prizeName = prizeName
         self.prizeImageData = prizeImageData
     }
