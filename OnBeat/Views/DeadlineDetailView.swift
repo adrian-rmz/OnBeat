@@ -20,30 +20,64 @@ struct DeadlineDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // Deadline Information Section
-                VStack(spacing: 10) {
+                ZStack(alignment: .bottomLeading) {
+                    // Image Header
                     if let prizeImageData = deadline.prizeImageData, let prizeImage = UIImage(data: prizeImageData) {
                         Image(uiImage: prizeImage)
                             .resizable()
                             .scaledToFill()
-                            .frame(width: 120, height: 120)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.gray, lineWidth: 2))
+                            .frame(height: 200)
+                            .clipped()
                     } else {
-                        Circle()
+                        Rectangle()
                             .fill(Color.gray.opacity(0.2))
-                            .frame(width: 120, height: 120)
+                            .frame(height: 200)
                     }
-                    Text("\(deadline.prizeName)")
-                        .font(.title)
-                    Text("Due: \(deadline.dueDate, formatter: DateFormatter.shortDateFormatter)")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    ProgressView(value: deadline.progress, total: 1)
-                        .progressViewStyle(LinearProgressViewStyle())
-                        .frame(height: 5)
+
+                    // Title Section
+                    Text(deadline.name)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .padding([.leading, .bottom], 16) // Padding for bottom-left alignment
+                        .foregroundColor(.white)
+                }
+
+                // Details Section
+                HStack(spacing: 15) {
+                    DetailCard(icon: "trophy", title: deadline.prizeName, backgroundColor: .yellow)
+                    VStack {
+                        Text(deadline.teamEmoji)
+                            .font(.system(size: 40))
+                            .bold()
+                            .padding(.bottom, 4)
+                        Text("days left")
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(width: 100, height: 100)
+                    .background(.accent)
+                    .cornerRadius(15)
+                    VStack {
+                        Text("\(daysLeft())")
+                            .font(.system(size: 40))
+                            .bold()
+                            .padding(.bottom, 4)
+                        Text("days left")
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(width: 100, height: 100)
+                    .background(.accent)
+                    .cornerRadius(15)
                 }
                 .padding(.horizontal)
+                
+                // Progress View
+                ProgressView(value: deadline.progress, total: 1)
+                    .progressViewStyle(LinearProgressViewStyle())
+                    .frame(height: 5)
+                    .padding(.vertical)
+                    .padding(.horizontal, 40)
 
                 // Tasks Section
                 VStack(spacing: 15) {
@@ -51,30 +85,36 @@ struct DeadlineDetailView: View {
                         TimelineTaskView(task: task)
                     }
                 }
-                .padding(.horizontal)
-            }
-        }
-        .navigationTitle(deadline.name)
-        .toolbar {
-            // Button for taking a screenshot
-            ToolbarItem(placement: .navigationBarTrailing) {
-                ZStack {
-                    Button(action: takeScreenshot) {
-                        Image(systemName: "camera")
-                    }
-                    .disabled(deadline.progress < 1) // Disable if progress is not 100%
+                .padding(.horizontal, 40)
+                
+                Spacer()
+                
+                Button(action: takeScreenshotAndShare) {
+                    HStack {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.title3) // Tamaño del ícono
+                            .foregroundColor(.black)
 
-                    // Overlay to detect taps on the disabled button
-                    if deadline.progress < 1 {
-                        Color.clear
-                            .contentShape(Rectangle()) // Ensures the overlay is tappable
-                            .onTapGesture {
-                                showFeedbackMessage = true
-                            }
+                        Text("Share with your team")
+                            .font(.headline)
+                            .foregroundColor(.black)
+                    }
+                    .padding() // Espaciado interno del botón
+                    .frame(maxWidth: .infinity) // Ocupa todo el ancho disponible
+                    .background(Color.yellow)
+                    .cornerRadius(10) // Bordes redondeados
+                }
+                .padding(.vertical)
+                .padding(.horizontal, 40)
+                .sheet(isPresented: $showShareSheet) {
+                    if let capturedImage = capturedImage {
+                        ShareSheet(activityItems: [capturedImage])
                     }
                 }
             }
-
+        }
+//        .navigationTitle(deadline.name)
+        .toolbar {
             // Button for adding a task
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
@@ -111,12 +151,18 @@ struct DeadlineDetailView: View {
             )
         }
     }
-
-    // Captures the current screen as an image
-    private func takeScreenshot() {
+    
+    private func daysLeft() -> Int {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day], from: Date(), to: deadline.dueDate)
+        return components.day ?? 0
+    }
+    
+    // Función para capturar la pantalla y mostrar la hoja de compartir
+    private func takeScreenshotAndShare() {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = windowScene.windows.first else {
-            print("Failed to capture window scene.")
+            print("Failed to access window scene.")
             return
         }
 
@@ -128,5 +174,61 @@ struct DeadlineDetailView: View {
 
         capturedImage = image
         showShareSheet = true
+    }
+
+}
+
+// Custom DetailCard for the Header Section
+struct DetailCard: View {
+    let icon: String
+    let title: String
+    let backgroundColor: Color
+
+    var body: some View {
+        VStack {
+            Image(systemName: icon)
+                .font(.system(size: 40))
+                .padding(.bottom, 4)
+            Text(title)
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+        }
+        .frame(width: 100, height: 100)
+        .background(backgroundColor)
+        .cornerRadius(15)
+    }
+}
+
+// ShareSheet para presentar actividades de compartir
+//struct ShareSheet: UIViewControllerRepresentable {
+//    let activityItems: [Any]
+//
+//    func makeUIViewController(context: Context) -> UIActivityViewController {
+//        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+//    }
+//
+//    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+//}
+
+
+struct DeadlineDetailView_Previews: PreviewProvider {
+    static var previews: some View {
+        let mockTasks = [
+            TaskItem(name: "Read slides", isCompleted: false, index: 1),
+            TaskItem(name: "Review code", isCompleted: true, completionDate: Date(), index: 2)
+        ]
+
+        let mockDeadline = Deadline(
+            name: "Hackathon",
+            dueDate: Calendar.current.date(byAdding: .day, value: 23, to: Date())!,
+            teamName: "OnBeat",
+            teamEmoji: "🎯",
+            prizeName: "Sushi 🍣",
+            prizeImageData: nil
+        )
+
+        return NavigationView {
+            DeadlineDetailView(deadline: mockDeadline)
+        }
     }
 }

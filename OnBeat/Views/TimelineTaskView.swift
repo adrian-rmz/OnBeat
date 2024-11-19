@@ -49,7 +49,7 @@ struct TimelineTaskView: View {
                 if let completionDate = task.completionDate {
                     Text("Completed: \(completionDate, formatter: DateFormatter.shortDateFormatter)")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.accentColor)
                 } else {
                     Text("Not completed yet")
                         .font(.subheadline)
