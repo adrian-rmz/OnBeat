@@ -55,7 +55,6 @@ struct DeadlinesView: View {
                 }) {
                     Image(systemName: "plus")
                         .font(.title)
-                        .foregroundColor(.blue)
                 }
             }
             .sheet(isPresented: $isPresentingAddDeadlineView) {

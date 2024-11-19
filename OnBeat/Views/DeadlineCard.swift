@@ -87,7 +87,7 @@ struct DeadlineCard: View {
 
                 // Progress Bar
                 ProgressView(value: deadline.progress, total: 1)
-                    .progressViewStyle(LinearProgressViewStyle(tint: Color.blue))
+                    .progressViewStyle(LinearProgressViewStyle(tint: .accentColor))
                     .frame(height: 8)
                     .cornerRadius(4)
                     .padding(.top, 5)
