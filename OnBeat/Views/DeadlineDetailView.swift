@@ -15,7 +15,7 @@ struct DeadlineDetailView: View {
     @State private var newTaskName = ""
     @State private var showShareSheet = false
     @State private var capturedImage: UIImage?
-    @State private var showFeedbackMessage = false // To show a message when clicking a disabled button
+    @State private var showFeedbackMessage = false // Mostrar alerta si se presiona el botón deshabilitado
 
     var body: some View {
         ScrollView {
@@ -34,11 +34,17 @@ struct DeadlineDetailView: View {
                             .frame(height: 200)
                     }
 
+                    // Black Overlay
+                    Rectangle()
+                        .fill(Color.black.opacity(0.3))
+                        .frame(height: 200)
+                        .clipped()
+                    
                     // Title Section
                     Text(deadline.name)
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .padding([.leading, .bottom], 16) // Padding for bottom-left alignment
+                        .padding([.leading, .bottom], 16)
                         .foregroundColor(.white)
                 }
 
@@ -50,7 +56,7 @@ struct DeadlineDetailView: View {
                             .font(.system(size: 40))
                             .bold()
                             .padding(.bottom, 4)
-                        Text("days left")
+                        Text(deadline.teamName)
                             .font(.subheadline)
                             .multilineTextAlignment(.center)
                     }
@@ -81,7 +87,7 @@ struct DeadlineDetailView: View {
 
                 // Tasks Section
                 VStack(spacing: 15) {
-                    ForEach(deadline.tasks, id: \.id) { task in // Explicitly use the `id` property
+                    ForEach(deadline.tasks, id: \.id) { task in
                         TimelineTaskView(task: task)
                     }
                 }
@@ -89,20 +95,27 @@ struct DeadlineDetailView: View {
                 
                 Spacer()
                 
-                Button(action: takeScreenshotAndShare) {
+                // Share Button
+                Button(action: {
+                    if deadline.progress < 1 {
+                        showFeedbackMessage = true // Mostrar alerta
+                    } else {
+                        takeScreenshotAndShare()
+                    }
+                }) {
                     HStack {
                         Image(systemName: "square.and.arrow.up")
-                            .font(.title3) // Tamaño del ícono
+                            .font(.title3)
                             .foregroundColor(.black)
 
                         Text("Share with your team")
                             .font(.headline)
                             .foregroundColor(.black)
                     }
-                    .padding() // Espaciado interno del botón
-                    .frame(maxWidth: .infinity) // Ocupa todo el ancho disponible
-                    .background(Color.yellow)
-                    .cornerRadius(10) // Bordes redondeados
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(deadline.progress < 1 ? Color.gray : Color.yellow) // Cambiar color si está deshabilitado
+                    .cornerRadius(10)
                 }
                 .padding(.vertical)
                 .padding(.horizontal, 40)
@@ -113,7 +126,6 @@ struct DeadlineDetailView: View {
                 }
             }
         }
-//        .navigationTitle(deadline.name)
         .toolbar {
             // Button for adding a task
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -137,11 +149,6 @@ struct DeadlineDetailView: View {
             }
         }, message: {
             Text("Enter the task name for this deadline.")
-        })
-        .sheet(isPresented: $showShareSheet, content: {
-            if let image = capturedImage {
-                ShareSheet(activityItems: [image])
-            }
         })
         .alert(isPresented: $showFeedbackMessage) {
             Alert(
@@ -177,6 +184,8 @@ struct DeadlineDetailView: View {
     }
 
 }
+
+
 
 // Custom DetailCard for the Header Section
 struct DetailCard: View {

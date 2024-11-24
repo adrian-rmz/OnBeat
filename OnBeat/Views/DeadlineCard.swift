@@ -52,7 +52,7 @@ struct DeadlineCard: View {
 //                        .font(.headline)
                         .fontWeight(.bold)
                         .foregroundColor(.black)
-                    Text("· \(deadline.teamName)")
+                    Text("· \(deadline.teamName) \(deadline.teamEmoji)")
 //                        .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundColor(.black)
